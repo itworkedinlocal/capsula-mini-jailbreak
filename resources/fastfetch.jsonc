@@ -1,0 +1,73 @@
+{
+  "logo": {
+    "type": "data",
+    "source": "$1      ___ggg@@@@@@@@@@@@@@@@@@@@@ggg___      \n   ,g@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@_   \n  o@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@  \n /@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ \n @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ \n @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@|\n|@@@@@@@BBBBB@@@@@@@BBBBB@@@@@@BBBBBB@@@@@@@g\n[@@@@@@g$2@@@@@$1@@@@@@g$2@@@@|$1@@@@@@$2J@@@@$1j@@@@@@@@\n[@@@@@@@$28@@@@$1|@@@@@g$2@@@@|$1@@@@P$2g@@@@$1/@@@@@@@@@\n[@@@@@@@$2'@@@@\\$1@@@@@g$2@@@@|$1@@P$2_@@@@P$1j@@@@@@@@@@\n[@@@@@@@g$2Q@@@@$1'@@@@g$2@@@@gg@@@@@P$1_@@@@@@@@@@@@\n[@@@@@@@@L$2@@@@@_$1@@@g$2@@@@@@@@@@_$1<@@@@@@@@@@@@@\n[@@@@@@@@@L$2Q@@@@@_$10N$2@@@@F<0@@@@@@_$1@@@@@@@@@@@\n[@@@@@@@@@@@$2\"@@@@@@@@@@@|$1@@@p$2\"@@@@@$1'@@@@@@@@@\n[@@@@@@@@@@@@@_$24@@@@@@@@|$1@@@@@g$2t@@@@,$1@@@@@@@@\n|@@@@@@@@@@@@@@@@g_$2\"=4BB!$1@@@@@@@$2VBBBB$1'@@@@@@g\n @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@|\n @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ \n {@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ \n  %@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@  \n   `8@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@\"   \n       \"<=BBB@@@@@@@@@@@@@@@@@@@BBB=>\"       ",
+    "color": {
+      "1": "38;2;59;120;255",
+      "2": "38;2;255;255;255"
+    }
+  },
+  "display": {
+    "separator": " : "
+  },
+  "modules": [
+    "Title",
+    "Separator",
+    "OS",
+    {
+      "type": "Command",
+      "key": "Platform",
+      "text": "echo 'Amlogic Meson-AXG (A113X)'"
+    },
+    {
+      "type": "Command",
+      "key": "Boot Slot",
+      "text": "case \"$(cat /proc/cmdline)\" in *slot_suffix=_a*) echo 'Slot A';; *slot_suffix=_b*) echo 'Slot B';; *) echo 'Unknown';; esac"
+    },
+    {
+      "type": "Command",
+      "key": "RootFS",
+      "text": "echo 'OverlayFS (Persistent RW)'"
+    },
+    "Kernel",
+    "Uptime",
+    "Processes",
+    "CPU",
+    {
+      "type": "Command",
+      "key": "CPU Temp",
+      "text": "t=$(cat /sys/class/thermal/thermal_zone0/temp 2>/dev/null) && echo \"$((t / 1000)).$(( (t % 1000) / 100 ))°C\" || echo 'N/A'"
+    },
+    {
+      "type": "Command",
+      "key": "Ambient Light",
+      "text": "cut -c 1-4 /sys/bus/i2c/devices/0-0029/iio:device0/in_illuminance_both_input 2>/dev/null | sed 's/$/ lx/' || echo 'N/A'"
+    },
+    {
+      "type": "Command",
+      "key": "Wireless",
+      "text": "echo 'Amlogic W1 (SDIO)'"
+    },
+    {
+      "type": "Command",
+      "key": "Audio Stack",
+      "text": "echo 'NTP8910A (TDM) + 4x PDM Mics'"
+    },
+    "Memory",
+    {
+      "type": "Disk",
+      "folders": "/data"
+    },
+    {
+      "type": "LocalIP",
+      "showIpv6": false
+    },
+    {
+      "type": "Command",
+      "key": "Entware",
+      "text": "/usr/lib/capsula-root/entware state"
+    },
+    "Break",
+    "Colors"
+  ]
+}

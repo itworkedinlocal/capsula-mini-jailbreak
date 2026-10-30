@@ -1,0 +1,20 @@
+#!/bin/sh
+# Restricted wget interface used by bundled opkg; certificate checks are mandatory.
+set -eu
+output= timeout=60 url=
+while [ "$#" -gt 0 ]; do
+    case "$1" in
+        -q|--quiet) shift ;;
+        -O|--output-document) [ "$#" -ge 2 ] || exit 2; output=$2; shift 2 ;;
+        -O*) output=${1#-O}; shift ;;
+        --timeout|-T) [ "$#" -ge 2 ] || exit 2; timeout=$2; shift 2 ;;
+        --timeout=*) timeout=${1#*=}; shift ;;
+        https://*) [ -z "$url" ] || exit 2; url=$1; shift ;;
+        *) printf 'Entware: неподдерживаемый аргумент загрузки: %s\n' "$1" >&2; exit 2 ;;
+    esac
+done
+[ -n "$url" ] && [ -n "$output" ] || exit 2
+case "$timeout" in ''|*[!0-9]*) exit 2 ;; esac
+exec /usr/lib/capsula-root/bin/curl --disable --fail --silent --show-error --location \
+    --proto '=https' --proto-redir '=https' --connect-timeout 20 --max-time "$timeout" \
+    --cacert /usr/lib/capsula-root/entware-bootstrap/cacert.pem --output "$output" "$url"

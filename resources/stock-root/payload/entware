@@ -1,0 +1,147 @@
+#!/bin/sh
+# Optional Entware on data. Never start rc.unslung or replace stock accounts.
+set -eu
+export PATH=/usr/lib/capsula-root/entware-bootstrap/bin:/usr/lib/capsula-root/bin:/usr/sbin:/usr/bin:/sbin:/bin
+BB=/usr/lib/capsula-root/busybox
+BASE=/usr/lib/capsula-root/entware-bootstrap
+ROOT=/data/entware
+ENABLED=/data/capsula-entware.enabled
+fail() { printf 'Entware: %s\n' "$*" >&2; exit 1; }
+mounted() { $BB awk '$2=="/opt"{found=1}END{exit !found}' /proc/mounts; }
+owned_mount() {
+    [ -d "$ROOT" ] && [ ! -L "$ROOT" ] && [ -d /opt ] && [ ! -L /opt ] || return 1
+    [ "$($BB stat -c '%d:%i' "$ROOT")" = "$($BB stat -c '%d:%i' /opt)" ]
+}
+stored_executable() {
+    relative=$1
+    remaining=8
+    while [ "$remaining" -gt 0 ]; do
+        case "$relative" in ''|/*|*..*|*//*|*[!a-zA-Z0-9_./+-]*) return 1 ;; esac
+        path=$ROOT/$relative
+        if [ ! -L "$path" ]; then [ -f "$path" ] && [ -x "$path" ]; return; fi
+        target=$($BB readlink "$path") || return 1
+        case "$target" in
+            /opt/*) relative=${target#/opt/} ;;
+            /*) return 1 ;;
+            *) relative=${relative%/*}/$target ;;
+        esac
+        remaining=$((remaining - 1))
+    done
+    return 1
+}
+ready() {
+    [ -f "$ROOT/.capsula-ready" ] && [ ! -L "$ROOT/.capsula-ready" ] || return 1
+    [ "$($BB cat "$ROOT/.capsula-ready")" = capsula-entware-v2 ] || return 1
+    stored_executable bin/opkg && stored_executable bin/find && stored_executable lib/ld-linux-aarch64.so.1 || return 1
+    [ -f "$ROOT/lib/opkg/status" ] && [ ! -L "$ROOT/lib/opkg/status" ] || return 1
+    $BB awk 'BEGIN{RS="";FS="\n"} {p=0;s=0;for(i=1;i<=NF;i++){if($i=="Package: entware-opt")p=1;if($i ~ /^Status: install .* installed$/)s=1}if(p&&s)ok=1}END{exit !ok}' "$ROOT/lib/opkg/status"
+}
+state() {
+    if [ ! -e "$ROOT" ] && [ ! -L "$ROOT" ]; then echo not-installed
+    elif [ -L "$ROOT" ] || [ ! -d "$ROOT" ] || [ -L "$ENABLED" ]; then echo mount-error
+    elif ! ready; then echo incomplete
+    elif [ ! -f "$ENABLED" ]; then echo disabled
+    elif mounted && owned_mount; then echo active
+    else echo mount-error; fi
+}
+mount_opt() {
+    [ -d "$ROOT" ] && [ ! -L "$ROOT" ] || fail 'каталог /data/entware отсутствует или небезопасен'
+    if mounted; then owned_mount || fail '/opt занят другим хранилищем'; return; fi
+    [ ! -L /opt ] || fail '/opt является ссылкой'
+    [ -d /opt ] || $BB mkdir /opt
+    [ -z "$($BB ls -A /opt)" ] || fail '/opt не пуст'
+    $BB mount -o bind "$ROOT" /opt
+    owned_mount || fail 'bind mount не подтверждён'
+}
+case "${1:-status}" in
+    state) state; exit 0 ;;
+    status)
+        case "$(state)" in
+            not-installed) echo 'Entware не установлен.' ;;
+            incomplete) echo 'Установка Entware не завершена. Повторите capsula entware install.' ;;
+            disabled) echo 'Entware отключён. Пакеты сохранены.' ;;
+            active) echo 'Entware активен. /opt подключён; пакеты готовы.' ;;
+            mount-error) echo 'Entware: ошибка подключения /opt или небезопасные пути.' ;;
+        esac
+        exit 0 ;;
+    install|mount|remove) ;;
+    *) fail 'команды: install, status, remove' ;;
+esac
+[ "$(/usr/lib/capsula-root/supervisor uid)" = 0 ] || fail 'требуется root'
+[ ! -L /run/capsula-entware.lock ] || fail 'небезопасный lock'
+umask 077
+exec 9>/run/capsula-entware.lock
+$BB flock -n 9 || fail 'другая операция Entware уже выполняется'
+case "${1:-}" in
+    mount)
+        [ -f "$ENABLED" ] && [ ! -L "$ENABLED" ] || exit 0
+        ready || fail 'установка не завершена; автоподключение пропущено'
+        mount_opt ;;
+    remove)
+        if mounted; then owned_mount || fail '/opt занят другим хранилищем'; $BB umount /opt; fi
+        [ ! -L "$ENABLED" ] || fail 'небезопасный флаг Entware'
+        $BB rm -f "$ENABLED"
+        $BB sync
+        printf 'Entware отключён. Пакеты сохранены в /data/entware.\n' ;;
+    install)
+        [ "$($BB uname -m)" = aarch64 ] || fail 'поддерживается только A113X ARM64'
+        [ ! -L "$ROOT" ] && [ ! -L "$ENABLED" ] || fail 'небезопасные пути'
+        $BB df -Pk /data | $BB awk 'NR==2{r=$2/5;if(r<16384)r=16384;exit !($4>=r+16384)}' || fail 'недостаточно места на data'
+        if [ -e "$ROOT" ]; then
+            [ -d "$ROOT" ] && [ -f "$ROOT/.capsula-entware" ] && [ ! -L "$ROOT/.capsula-entware" ] || fail 'каталог Entware принадлежит другой установке'
+            [ "$($BB cat "$ROOT/.capsula-entware")" = capsula-entware-v1 ] || fail 'неизвестная установка Entware'
+        else
+            $BB mkdir -m 0755 "$ROOT"
+            printf 'capsula-entware-v1\n' > "$ROOT/.capsula-entware"
+        fi
+        newly_mounted=0
+        mounted || newly_mounted=1
+        install_ok=0
+        cleanup() {
+            rc=$?; trap - EXIT
+            if [ "$install_ok" = 0 ] && [ "$newly_mounted" = 1 ] && mounted && owned_mount; then
+                $BB umount /opt || rc=1
+            fi
+            exit "$rc"
+        }
+        trap cleanup EXIT
+        mount_opt
+        for dir in bin etc lib lib/opkg tmp var var/lock var/opkg-lists; do
+            [ ! -L "/opt/$dir" ] || fail 'небезопасный каталог Entware'
+            $BB mkdir -p "/opt/$dir"
+        done
+        for file in /opt/bin/opkg /opt/etc/opkg.conf /opt/.capsula-ready; do
+            [ ! -L "$file" ] || fail 'небезопасный файл Entware'
+        done
+        if [ ! -e /opt/bin/opkg ] || $BB cmp -s /opt/bin/opkg "$BASE/opkg-wrapper"; then
+            $BB cp "$BASE/opkg" /opt/bin/opkg
+            $BB chmod 0755 /opt/bin/opkg
+        fi
+        if [ -e /opt/etc/opkg.conf ]; then
+            $BB cmp -s /opt/etc/opkg.conf "$BASE/opkg.conf" || fail 'конфигурация opkg изменена'
+        else $BB cp "$BASE/opkg.conf" /opt/etc/opkg.conf; fi
+        # Explicit configuration also works with opkg versions whose offline mode
+        # otherwise loses the /opt feed. Base postinstall performs library setup;
+        # rc.unslung is deliberately not added to stock startup.
+        "$BASE/opkg-wrapper" update
+        "$BASE/opkg-wrapper" install entware-opt
+        for file in passwd group shells; do
+            if [ ! -e "/opt/etc/$file" ] && [ -f "/opt/etc/$file.1" ]; then
+                [ ! -L "/opt/etc/$file" ] || fail 'небезопасный файл учётных записей'
+                $BB cp "/opt/etc/$file.1" "/opt/etc/$file"
+            fi
+        done
+        $BB chmod 1777 /opt/tmp
+        /opt/bin/find --version >/dev/null || fail 'базовая программа Entware не запускается'
+        [ ! -L /opt/.capsula-ready.tmp ] || fail 'небезопасный ready marker'
+        printf 'capsula-entware-v2\n' > /opt/.capsula-ready.tmp
+        $BB mv /opt/.capsula-ready.tmp /opt/.capsula-ready
+        ready || fail 'базовый пакет Entware не настроен'
+        [ ! -L "$ENABLED.tmp" ] || fail 'небезопасный временный флаг'
+        printf 'enabled\n' > "$ENABLED.tmp"
+        $BB mv "$ENABLED.tmp" "$ENABLED"
+        $BB sync
+        install_ok=1
+        printf 'Entware установлен и активен. Службы не запущены. Пакеты: opkg install ИМЯ\n'
+        ;;
+esac

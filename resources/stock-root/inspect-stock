@@ -1,0 +1,26 @@
+#!/bin/sh
+# Only the read-only stock partition is attached; data is never mounted here.
+set -eu
+BB=/bin/busybox
+[ -f /capsula-device.conf ] || exit 1
+. /capsula-device.conf
+$BB awk '$3=="overlay"||$3=="ubifs"{bad=1}END{exit bad}' /proc/mounts || exit 1
+[ ! -d /sys/class/ubi/ubi0 ] && [ ! -d /sys/class/ubi/ubi1 ] || exit 1
+cleanup() {
+    rc=$?
+    trap - EXIT
+    $BB umount /stock 2>/dev/null || :
+    if [ -d /sys/class/ubi/ubi1 ]; then /capsula-ubi-control detach stock || rc=1; fi
+    exit "$rc"
+}
+trap cleanup EXIT
+/capsula-ubi-control attach stock
+[ "$($BB cat /sys/class/ubi/ubi1_0/name)" = rootfs ] || exit 1
+$BB mount -t ubifs -o ro,noatime,chk_data_crc ubi1:rootfs /stock
+for file in etc/passwd etc/shadow etc/profile etc/init.d/S89usbgadget.sh; do
+    [ -f "/stock/$file" ] && [ ! -L "/stock/$file" ] || exit 1
+    $BB sha256sum "/stock/$file"
+done
+$BB umount /stock
+/capsula-ubi-control detach stock
+echo STOCK_CLEAN

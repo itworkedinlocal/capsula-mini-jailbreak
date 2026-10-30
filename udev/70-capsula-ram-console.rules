@@ -1,0 +1,2 @@
+# Narrow rule for the custom RAM-test USB ACM gadget, before seat-late rules.
+SUBSYSTEM=="tty", KERNEL=="ttyACM[0-9]*", ATTRS{idVendor}=="1d6b", ATTRS{idProduct}=="0104", ATTRS{serial}=="capsula-ramboot", SYMLINK+="capsula-ram-console", TAG+="uaccess"

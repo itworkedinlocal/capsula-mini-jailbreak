@@ -1,0 +1,5 @@
+#!/bin/sh
+export PATH=/usr/lib/capsula-root/entware-bootstrap/bin:/usr/lib/capsula-root/bin:/opt/bin:/opt/sbin:/usr/sbin:/usr/bin:/sbin:/bin
+[ -f /opt/etc/opkg.conf ] && [ ! -L /opt/etc/opkg.conf ] || { echo 'Entware не подключён. Выполните capsula entware install.' >&2; exit 1; }
+unset LD_LIBRARY_PATH LD_PRELOAD OFFLINE_ROOT
+exec /usr/lib/capsula-root/entware-bootstrap/opkg -f /opt/etc/opkg.conf "$@"

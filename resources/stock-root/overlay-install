@@ -1,0 +1,237 @@
+#!/bin/sh
+# Offline native UBIFS publication; never modify mounted OverlayFS upper.
+set -eu
+export PATH=/bin:/sbin
+BB=/bin/busybox
+[ ! -f /capsula-runtime-policy ] || . /capsula-runtime-policy
+[ -f /capsula-runtime-policy ] || enabled() { return 0; }
+P=/capsula-root-payload
+U=/data/overlay/upper
+S=/data/.capsula-root-state
+fail() { echo "REFUSED: $*" >&2; exit 1; }
+absent() { [ ! -e "$1" ] && [ ! -L "$1" ]; }
+safe_file() {
+    case "$1" in ''|/*|*..*|*//*|*[!a-zA-Z0-9_./+-]*) fail unsafe_path ;; esac
+    case "$1" in etc/shadow|etc/profile|etc/init.d/S89usbgadget.sh|etc/init.d/S95telemetry.sh|etc/capsula-root/hostkey|usr/lib/capsula-root/*) ;; *) fail outside_namespace ;; esac
+}
+safe_parent() {
+    parent=${1%/*}
+    while [ "$parent" != "$1" ]; do
+        absent "$U/$parent" || { [ -d "$U/$parent" ] && [ ! -L "$U/$parent" ]; } || fail "unsafe parent: $parent"
+        case "$parent" in */*) parent=${parent%/*} ;; *) break ;; esac
+    done
+}
+validate_index() {
+    [ -f "$1" ] && [ ! -L "$1" ] && [ -s "$1" ] || fail invalid_index
+    while read -r mode digest rel extra; do
+        [ -z "${extra:-}" ] || fail malformed_index
+        case "$mode" in 0600|0644|0755) ;; *) fail bad_mode ;; esac
+        [ "${#digest}" = 64 ] || fail bad_hash
+        case "$digest" in *[!0-9a-f]*) fail bad_hash ;; esac
+        safe_file "$rel"; safe_parent "$rel"
+    done < "$1"
+    [ "$($BB awk '{print $3}' "$1" | $BB sort | $BB uniq -d | $BB wc -l)" = 0 ] || fail duplicate_path
+}
+installed_index() {
+    [ -d "$S" ] && [ ! -L "$S" ] || fail state_missing
+    [ -f "$S/files.tsv" ] || fail unsupported_package_state
+    INDEX=$S/files.tsv
+    validate_index "$INDEX"
+}
+verify_files() {
+    installed_index
+    while read -r mode digest rel; do
+        [ -f "$U/$rel" ] && [ ! -L "$U/$rel" ] || fail "missing or unsafe file: $rel"
+        [ "$($BB stat -c '%u:%g:%a' "$U/$rel")" = "0:0:${mode#0}" ] || fail "permissions: $rel"
+        actual=$($BB sha256sum "$U/$rel"); actual=${actual%% *}
+        if enabled PACKAGE_HASH; then [ "$actual" = "$digest" ] || fail "changed owned file: $rel"; fi
+    done < "$INDEX"
+}
+check_space() {
+    enabled SPACE || return 0
+    bytes=$($BB cat "$P/payload-bytes")
+    case "$bytes" in ''|*[!0-9]*) fail payload_size ;; esac
+    $BB df -Pk /data | $BB awk -v bytes="$bytes" 'NR==2 {reserve=$2/5;if(reserve<16384)reserve=16384;exit !($4>=reserve+(bytes+1023)/1024+1024)}' || fail insufficient_space
+}
+prepare_parents() {
+    $BB awk '{p=$3;while(sub("/[^/]+$","",p))print p}' "$P/files.tsv" > /run/capsula-parents.tmp || fail parent_index
+    $BB sort -u /run/capsula-parents.tmp > /run/capsula-parents || fail parent_index
+}
+remember_parents() {
+    [ -f "$S/created-dirs" ] || : > "$S/created-dirs"
+    [ -f "$S/times.list" ] || : > "$S/times.list"
+    $BB mkdir -p "$S/times"
+    { printf '.\n'; $BB cat /run/capsula-parents; } | while read -r rel; do
+        if [ -d "$U/$rel" ]; then
+            if ! $BB awk -v p="$rel" '$2==p{f=1}END{exit !f}' "$S/times.list"; then
+                key=$(printf '%s' "$rel" | $BB sha256sum); key=${key%% *}
+                /capsula-directory-times save "$U/$rel" "$S/times/$key"
+                printf '%s %s\n' "$key" "$rel" >> "$S/times.list"
+            fi
+        else printf '%s\n' "$rel" >> "$S/created-dirs"; fi
+    done
+    $BB sort -u "$S/created-dirs" > "$S/created-dirs.tmp"
+    $BB mv "$S/created-dirs.tmp" "$S/created-dirs"
+}
+publish() {
+    if enabled STOCK_COMPARE; then $BB sha256sum -c "$P/lower.sha256" >/dev/null || fail stock_changed; fi
+    validate_index "$P/files.tsv"
+    prepare_parents
+    check_space
+    while read -r mode digest rel; do
+        if ! absent "$U/$rel"; then
+            if enabled CONFLICTS; then $BB awk -v p="$rel" '$3==p{f=1}END{exit !f}' "$INDEX" || fail "unowned upper file: $rel"; fi
+            { [ -f "$U/$rel" ] && [ ! -L "$U/$rel" ]; } || {
+                # An owned final symlink is removed, never followed. Intermediate
+                # parents are always validated as actual directories.
+                [ -L "$U/$rel" ] && $BB awk -v p="$rel" '$3==p{f=1}END{exit !f}' "$INDEX"
+            } || fail unsafe_target
+        fi
+    done < "$P/files.tsv"
+    while read -r mode digest rel; do
+        $BB awk -v p="$rel" '$3==p{f=1}END{exit !f}' "$P/files.tsv" || fail "removed path needs migration: $rel"
+    done < "$INDEX"
+    $BB mkdir -p "$S/stage" "$S/times"
+    remember_parents
+    $BB cp "$INDEX" "$S/previous-files.tsv.next"
+    $BB sync
+    $BB mv "$S/previous-files.tsv.next" "$S/previous-files.tsv"
+    $BB tar -xpf "$P/overlay-files.tar" -C "$S/stage"
+    if enabled PACKAGE_HASH; then (cd "$S/stage" && $BB sha256sum -c "$P/files.sha256" >/dev/null) || fail staging_checksum; fi
+    : > /data/capsula-root.disabled
+    $BB chmod 0600 /data/capsula-root.disabled
+    $BB cp "$P/files.tsv" "$S/files.tsv.next"
+    $BB sync
+    $BB mv "$S/files.tsv.next" "$S/files.tsv"
+    $BB cp "$P/files.sha256" "$S/files.sha256"
+    $BB cp "$P/manifest.json" "$S/manifest.json"
+    $BB chmod 0600 "$S/files.tsv" "$S/previous-files.tsv" "$S/files.sha256" "$S/manifest.json"
+    printf 'publishing\n' > "$S/state"
+    $BB sync
+    while read -r rel; do
+        if absent "$U/$rel"; then
+            case "$rel" in etc/capsula-root) mode=0700 ;; *) mode=0755 ;; esac
+            $BB mkdir -m "$mode" "$U/$rel"
+        fi
+    done < /run/capsula-parents
+    while read -r mode digest rel; do
+        if [ "$rel" != etc/init.d/S89usbgadget.sh ]; then
+            [ ! -L "$U/$rel" ] || $BB rm "$U/$rel"
+            $BB mv -f "$S/stage/$rel" "$U/$rel"
+        fi
+    done < "$P/files.tsv"
+    $BB sync
+    [ ! -L "$U/etc/init.d/S89usbgadget.sh" ] || $BB rm "$U/etc/init.d/S89usbgadget.sh"
+    $BB mv -f "$S/stage/etc/init.d/S89usbgadget.sh" "$U/etc/init.d/S89usbgadget.sh"
+    printf 'installed\n' > "$S/state"
+    $BB sync
+    echo 'Overlay published; disabled until remount verification.'
+}
+[ "$($BB id -u)" = 0 ] || fail root
+if [ -f "$P/fixture-only" ]; then
+    $BB grep -qw capsula_sandbox=1 /proc/cmdline || fail fixture_on_hardware
+else
+    $BB grep -qw capsula_persist_install=1 /proc/cmdline || fail wrong_environment
+    DATA_INDEX=8 DATA_SIZE=81264640 MTD_COUNT=9
+    [ ! -f /capsula-device.conf ] || . /capsula-device.conf
+    [ "$($BB cat /sys/class/mtd/mtd$DATA_INDEX/name)" = data ] || fail data_name
+    [ "$($BB cat /sys/class/mtd/mtd$DATA_INDEX/size)" = "$DATA_SIZE" ] || fail data_size
+    [ "$($BB cat /sys/class/mtd/mtd$DATA_INDEX/erasesize)" = 131072 ] || fail erase_size
+    [ "$($BB cat /sys/class/mtd/mtd$DATA_INDEX/writesize)" = 2048 ] || fail write_size
+    n=0
+    while [ "$n" -lt "$MTD_COUNT" ]; do
+        flags=$($BB cat /sys/class/mtd/mtd$n/flags)
+        expected=0; [ "$n" != "$DATA_INDEX" ] || expected=1024
+        [ "$((flags & 1024))" = "$expected" ] || fail unexpected_write_permission
+        n=$((n + 1))
+    done
+    $BB awk '$2=="/stock"&&$3=="ubifs"&&$4~/(^|,)ro(,|$)/{f=1}END{exit !f}' /proc/mounts || fail stock_mount
+fi
+$BB awk '$2=="/data"&&$3=="ubifs"&&$4~/(^|,)rw(,|$)/{f=1}END{exit !f}' /proc/mounts || fail data_mount
+$BB awk '$3=="overlay"{f=1}END{exit f}' /proc/mounts || fail overlay_mounted
+for dir in /data /data/overlay "$U" "$U/etc"; do
+    [ -d "$dir" ] && [ ! -L "$dir" ] || fail unsafe_upper
+done
+case "${1:-}" in
+install)
+    absent "$S" || fail installation_exists
+    absent /data/capsula-root.disabled || fail disabled_flag_exists
+    validate_index "$P/files.tsv"; check_space
+    while read -r mode digest rel; do
+        if enabled CONFLICTS; then absent "$U/$rel" || fail "existing upper file: $rel";
+        else absent "$U/$rel" || { [ -f "$U/$rel" ] && [ ! -L "$U/$rel" ]; } || fail unsafe_target; fi
+    done < "$P/files.tsv"
+    $BB mkdir -m 0700 "$S"
+    printf 'preparing\n' > "$S/state"
+    : > /run/capsula-empty-index; INDEX=/run/capsula-empty-index
+    publish
+    ;;
+refresh)
+    # Updating restores the published version, including manually modified or
+    # deleted files. New payload checks and remount verification remain strict.
+    installed_index
+    [ -f "$S/created-dirs" ] && [ ! -L "$S/created-dirs" ] || fail missing_directory_index
+    publish
+    ;;
+verify) verify_files; echo 'Overlay files, ownership and permissions verified.' ;;
+activate)
+    if enabled POST_VERIFY; then verify_files; else installed_index; fi
+    case "$($BB cat "$S/state")" in installed|active) ;; *) fail not_installed ;; esac
+    printf 'active\n' > "$S/state"; $BB sync
+    $BB rm -f /data/capsula-root.disabled; $BB sync
+    echo 'Persistent SSH enabled.'
+    ;;
+rollback)
+    phase=; [ ! -f "$S/state" ] || phase=$($BB cat "$S/state")
+    case "$phase" in ''|preparing|publishing|installed|active) ;; *) fail unknown_state ;; esac
+    early=0
+    if absent "$S/files.tsv" && absent "$S/files.sha256"; then
+        [ -d "$S" ] && [ ! -L "$S" ] || fail state_missing
+        case "$phase" in ''|preparing) ;; *) fail missing_published_index ;; esac
+        # Upper files cannot have been published before the durable index.
+        : > /run/capsula-empty-index; INDEX=/run/capsula-empty-index; early=1
+    else installed_index; fi
+    PREVIOUS=/run/capsula-empty-previous; : > "$PREVIOUS"
+    if [ -s "$S/previous-files.tsv" ]; then validate_index "$S/previous-files.tsv"; PREVIOUS=$S/previous-files.tsv; fi
+    $BB cat "$INDEX" "$PREVIOUS" > /run/capsula-rollback-index
+    $BB awk '{print $3}' /run/capsula-rollback-index | $BB sort -u > /run/capsula-rollback-paths
+    while read -r rel; do
+        safe_file "$rel"; safe_parent "$rel"
+        if ! absent "$U/$rel"; then
+            [ -f "$U/$rel" ] && [ ! -L "$U/$rel" ] || fail "unsafe rollback file: $rel"
+            actual=$($BB sha256sum "$U/$rel"); actual=${actual%% *}
+            $BB awk -v p="$rel" -v h="$actual" '$3==p&&$2==h{f=1}END{exit !f}' /run/capsula-rollback-index || fail "modified file: $rel"
+        fi
+    done < /run/capsula-rollback-paths
+    if [ -f "$S/created-dirs" ]; then $BB cp "$S/created-dirs" /run/capsula-created-dirs; elif [ "$early" = 1 ]; then
+        : > /run/capsula-created-dirs
+    else fail missing_directory_index; fi
+    # Validate directory paths, but retain user files added inside these trees.
+    while read -r rel; do
+        case "$rel" in ''|/*|*..*|*[!a-zA-Z0-9_./+-]*) fail unsafe_directory ;; esac
+        safe_parent "$rel/file"
+        absent "$U/$rel" && continue
+        [ -d "$U/$rel" ] && [ ! -L "$U/$rel" ] || fail unsafe_directory
+    done < /run/capsula-created-dirs
+    : > /data/capsula-root.disabled; $BB sync
+    if $BB grep -Fxq etc/init.d/S89usbgadget.sh /run/capsula-rollback-paths; then
+        $BB rm -f "$U/etc/init.d/S89usbgadget.sh"
+    fi
+    while read -r rel; do absent "$U/$rel" || $BB rm "$U/$rel"; done < /run/capsula-rollback-paths
+    $BB sort -r /run/capsula-created-dirs | while read -r rel; do
+        absent "$U/$rel" && continue
+        if ! $BB rmdir "$U/$rel" 2>/dev/null; then
+            [ "$($BB ls -A "$U/$rel" | $BB wc -c)" -gt 0 ] || fail "cannot remove directory: $rel"
+            echo "PRESERVED_DIRECTORY $rel"
+        fi
+    done
+    if [ -f "$S/times.list" ]; then
+        $BB sort -rk2 "$S/times.list" | while read -r key rel; do
+            [ ! -d "$U/$rel" ] || /capsula-directory-times restore "$U/$rel" "$S/times/$key"
+        done
+    fi
+    $BB rm -rf "$S"; $BB rm -f /data/capsula-root.disabled; $BB sync
+    echo 'Owned overlay removed; stock lower files visible.'
+    ;;
+*) fail 'usage: install|refresh|verify|activate|rollback' ;;
+esac

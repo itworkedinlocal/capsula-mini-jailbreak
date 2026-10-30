@@ -1,0 +1,25 @@
+{
+  "schema_version": 1,
+  "branch": "aarch64-k3.10",
+  "enabled_by_default": false,
+  "files": {
+    "opkg": {
+      "source": "entware-aarch64-opkg",
+      "mode": 493,
+      "sha256": "1c59274bd25080b869f376788795f5319d0d22e91f325f74ce98a7d596f68015",
+      "url": "https://bin.entware.net/aarch64-k3.10/installer/opkg"
+    },
+    "opkg.conf": {
+      "source": "entware-https-opkg.conf",
+      "mode": 420,
+      "sha256": "44c6c687a39d16b42c1fe9bdc91d06c53fd60be6b21383e6a8b4344501e6db16",
+      "url": "generated HTTPS config"
+    },
+    "cacert.pem": {
+      "source": "entware-cacert.pem",
+      "mode": 420,
+      "sha256": "796f1389bfea13c0ed78f663b765baaff54a508e5483786bd6ece73c5e3e3cbe",
+      "url": "https://curl.se/ca/cacert.pem"
+    }
+  }
+}

@@ -1,0 +1,9 @@
+/build/
+/dist/
+/.cache/
+/resources/ramboot/*.uimg
+__pycache__/
+*.py[cod]
+*.kate-swp
+*.swp
+*~

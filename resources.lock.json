@@ -1,0 +1,231 @@
+{
+  "schema_version": 1,
+  "version": "0.3.2-rc1",
+  "files": {
+    "resources/ramboot/Image": {
+      "bytes": 16715784,
+      "sha256": "7a155fcd0fbab5af149094f408e3bbb2209d478e4adac924659cd2b049014226",
+      "mode": 420
+    },
+    "resources/ramboot/initramfs.cpio.gz": {
+      "bytes": 928095,
+      "sha256": "7126bdc4411b753832a666e61209af563b7e9cf090649063dcdd8240116fa7e8",
+      "mode": 420
+    },
+    "resources/ramboot/vk-mini-a113x-usb-only.dtb": {
+      "bytes": 42953,
+      "sha256": "fcc62e6fb6bf13e3bd589564102c4f06f7b8156ad8a932ac18d5411e5f003485",
+      "mode": 420
+    },
+    "resources/stock-root/bin/aarch64/directory-times": {
+      "bytes": 10304,
+      "sha256": "4d126de8ddcf1431e7d663b964bc2ddd949abe2eedb02f568194f430178607c2",
+      "mode": 493
+    },
+    "resources/stock-root/bin/aarch64/dropbearmulti": {
+      "bytes": 622984,
+      "sha256": "86add59e36727cd0fa3a18f3f348868ee36c098bd914e2ca6756d09d194a0b70",
+      "mode": 493
+    },
+    "resources/stock-root/bin/aarch64/nand-agent": {
+      "bytes": 58616,
+      "sha256": "b6d60f16b2cc7e6c9b8ad3f24e592b8c26d7074d68d9ff184a3902ac0714498f",
+      "mode": 493
+    },
+    "resources/stock-root/bin/aarch64/ram-restart": {
+      "bytes": 48552,
+      "sha256": "ba82173df52630ea0ca4275091368966173e4750c9da4fc9f936b4e809ed7cd6",
+      "mode": 493
+    },
+    "resources/stock-root/bin/aarch64/supervisor": {
+      "bytes": 71256,
+      "sha256": "c350106b284f2742b7ce00201c11d27590325f6f6dbe19615b78f97b8d8989aa",
+      "mode": 493
+    },
+    "resources/stock-root/bin/aarch64/ubi-control": {
+      "bytes": 54168,
+      "sha256": "4eb9a4a13623e5122fdedafe029e5e808f2357d79785ee3eff9d488972c16989",
+      "mode": 493
+    },
+    "resources/stock-root/bin/windows-x86_64/password-hash.exe": {
+      "bytes": 42496,
+      "sha256": "83a58de5b1805ffdd735ccde9aa34c6926a3ddc68acc78b471f36e1d3e0c4464",
+      "mode": 493
+    },
+    "resources/stock-root/bin/x86_64/dropbearmulti": {
+      "bytes": 594976,
+      "sha256": "394e3e68c6e9f14e2571e403438963801ef16d127bd027c7e6fe51d9ac0d6329",
+      "mode": 493
+    },
+    "resources/stock-root/bin/x86_64/libusb-0.1.so.4": {
+      "bytes": 16144,
+      "sha256": "f3e1c8dc9f335d93c16a64ca0f51fabeca8f828237668afd6cc3cbbebd3d9eb0",
+      "mode": 493
+    },
+    "resources/stock-root/bin/x86_64/libusb-1.0.so.0": {
+      "bytes": 100880,
+      "sha256": "86accf6a36f0dce0e8e0a3ea116c332ee156a40ef19bb2d8916794a5da077234",
+      "mode": 493
+    },
+    "resources/stock-root/bin/x86_64/password-hash": {
+      "bytes": 27192,
+      "sha256": "905e7cc8f03f1d2c6148b73a118594ade86764894705b1619a630b2c7f1e846c",
+      "mode": 493
+    },
+    "resources/stock-root/sources/entware-aarch64-opkg": {
+      "bytes": 856112,
+      "sha256": "1c59274bd25080b869f376788795f5319d0d22e91f325f74ce98a7d596f68015",
+      "mode": 420
+    },
+    "resources/stock-root/sources/entware-cacert.pem": {
+      "bytes": 200116,
+      "sha256": "796f1389bfea13c0ed78f663b765baaff54a508e5483786bd6ece73c5e3e3cbe",
+      "mode": 420
+    },
+    "resources/stock-root/sources/entware-https-opkg.conf": {
+      "bytes": 176,
+      "sha256": "44c6c687a39d16b42c1fe9bdc91d06c53fd60be6b21383e6a8b4344501e6db16",
+      "mode": 420
+    },
+    "resources/stock-root/toolkit/aarch64/busybox": {
+      "bytes": 479024,
+      "sha256": "e3778e5667cebe75be76868a3334955b6f293528f0e67fecf2395276ae67b6e1",
+      "mode": 493
+    },
+    "resources/stock-root/toolkit/aarch64/curl": {
+      "bytes": 1431056,
+      "sha256": "25af0ea60c46530170b9533e07afb789d586c592246ee8042e7913fa71d443bf",
+      "mode": 493
+    },
+    "resources/stock-root/toolkit/aarch64/fastfetch": {
+      "bytes": 1588696,
+      "sha256": "0d6e31ef4ab37a4f941da8dea5914936a2c1dff257a93ed322ba4c368a437b32",
+      "mode": 493
+    },
+    "resources/stock-root/toolkit/aarch64/htop": {
+      "bytes": 531888,
+      "sha256": "ac63aa355f7416eabce53e23277d1cc459e8228c43de909cf676a5cb1b8e6756",
+      "mode": 493
+    },
+    "resources/stock-root/toolkit/aarch64/licenses/busybox.txt": {
+      "bytes": 18348,
+      "sha256": "bbfc9843646d483c334664f651c208b9839626891d8f17604db2146962f43548",
+      "mode": 420
+    },
+    "resources/stock-root/toolkit/aarch64/licenses/curl.txt": {
+      "bytes": 1088,
+      "sha256": "82f2f4427d6545ee5aaac4f0b80428da6cc8ba41c2cf5da3a03680ec327b9681",
+      "mode": 420
+    },
+    "resources/stock-root/toolkit/aarch64/licenses/fastfetch.txt": {
+      "bytes": 1112,
+      "sha256": "f30fab2451411172d78522346e91eae63ef1ea11c3487bc9acd0a68acd8c9571",
+      "mode": 420
+    },
+    "resources/stock-root/toolkit/aarch64/licenses/htop.txt": {
+      "bytes": 18092,
+      "sha256": "8177f97513213526df2cf6184d8ff986c675afb514d4e68a404010521b880643",
+      "mode": 420
+    },
+    "resources/stock-root/toolkit/aarch64/licenses/mbedtls.txt": {
+      "bytes": 29852,
+      "sha256": "9b405ef4c89342f5eae1dd828882f931747f71001cfba7d114801039b52ad09b",
+      "mode": 420
+    },
+    "resources/stock-root/toolkit/aarch64/licenses/nano.txt": {
+      "bytes": 35068,
+      "sha256": "fc82ca8b6fdb18d4e3e85cfd8ab58d1bcd3f1b29abe782895abd91d64763f8e7",
+      "mode": 420
+    },
+    "resources/stock-root/toolkit/aarch64/licenses/ncurses.txt": {
+      "bytes": 1447,
+      "sha256": "708999f95527e1ffa670c6fce288c6c600cb477dd04afcc1171422b3dd4ee226",
+      "mode": 420
+    },
+    "resources/stock-root/toolkit/aarch64/licenses/openssh.txt": {
+      "bytes": 21140,
+      "sha256": "5bb5b160726ef5756e4f32fe95b35249c294962419650f48d05134b486d27ccb",
+      "mode": 420
+    },
+    "resources/stock-root/toolkit/aarch64/manifest.json": {
+      "bytes": 5533,
+      "sha256": "aa9e0a342be9b0c9e251e2fb253ef02155c208da251c193fe3ecc0407f9f9bff",
+      "mode": 420
+    },
+    "resources/stock-root/toolkit/aarch64/nano": {
+      "bytes": 691128,
+      "sha256": "ce9a7a8b117013925bb38a8e2aac8604dffa5eebbf6c964441b45834cb8e2fbe",
+      "mode": 493
+    },
+    "resources/stock-root/toolkit/aarch64/sftp-server": {
+      "bytes": 379344,
+      "sha256": "d34b7200d16356c240017b30482bb3d9062d1ffb6056089d549ce45d3f3c5422",
+      "mode": 493
+    },
+    "resources/stock-root/toolkit/aarch64/terminfo/a/alacritty": {
+      "bytes": 3820,
+      "sha256": "d38836d94493d40580ad57ba9f2865b472850f00cf3ffa2c96ade49ec1336f7a",
+      "mode": 420
+    },
+    "resources/stock-root/toolkit/aarch64/terminfo/a/ansi": {
+      "bytes": 1481,
+      "sha256": "93ec8cb9beb0c898ebc7dda0f670de31addb605be9005735228680d592cff657",
+      "mode": 420
+    },
+    "resources/stock-root/toolkit/aarch64/terminfo/d/dumb": {
+      "bytes": 308,
+      "sha256": "123c85a2812a517d967db5f31660db0e6aded4a0b95ed943c5ab435368e7a25c",
+      "mode": 420
+    },
+    "resources/stock-root/toolkit/aarch64/terminfo/l/linux": {
+      "bytes": 1740,
+      "sha256": "b70a4941416eb703a01b5a06fd1c914880452302b0e0b2a7dea12600607824a7",
+      "mode": 420
+    },
+    "resources/stock-root/toolkit/aarch64/terminfo/s/screen": {
+      "bytes": 1667,
+      "sha256": "959a7f2be76d57c46890d4762c6f9b3658138d1f695ac0f4cd31fc7d5c3c6c79",
+      "mode": 420
+    },
+    "resources/stock-root/toolkit/aarch64/terminfo/s/screen-256color": {
+      "bytes": 1807,
+      "sha256": "33ec1d53ea6c5a494ec1e00148604f408bc43d0fd1669201e50f552619b22afa",
+      "mode": 420
+    },
+    "resources/stock-root/toolkit/aarch64/terminfo/t/tmux": {
+      "bytes": 3317,
+      "sha256": "ffe7235fb1b775cc0cb112f84151f5755597c0705e45961235db13f8cfe48470",
+      "mode": 420
+    },
+    "resources/stock-root/toolkit/aarch64/terminfo/t/tmux-256color": {
+      "bytes": 3459,
+      "sha256": "7f2870efd2bc94ba6ff2c6dd6e84777b687f4331920ad388991c5ffcfc444cca",
+      "mode": 420
+    },
+    "resources/stock-root/toolkit/aarch64/terminfo/v/vt100": {
+      "bytes": 1282,
+      "sha256": "779a219d6ed2ed282f9416ee04fe65f92a1c90606cf6e93a61cebfc3aa96c982",
+      "mode": 420
+    },
+    "resources/stock-root/toolkit/aarch64/terminfo/v/vt100-am": {
+      "bytes": 1282,
+      "sha256": "779a219d6ed2ed282f9416ee04fe65f92a1c90606cf6e93a61cebfc3aa96c982",
+      "mode": 420
+    },
+    "resources/stock-root/toolkit/aarch64/terminfo/x/xterm": {
+      "bytes": 3980,
+      "sha256": "258dbccf3cb114079baf5d3f870fbe0b6b1470303fa8399d2fca1dc56e9527c1",
+      "mode": 420
+    },
+    "resources/stock-root/toolkit/aarch64/terminfo/x/xterm-256color": {
+      "bytes": 4074,
+      "sha256": "1eb6ddea79d7512693e3be76ee66939984d134b5ad179b9418e73a651df9e5ef",
+      "mode": 420
+    },
+    "resources/update": {
+      "bytes": 1172224,
+      "sha256": "aa03cad4b8561bd376450bae702cfaa69eb1b4f4346ccff719af2864e90b6799",
+      "mode": 493
+    }
+  }
+}

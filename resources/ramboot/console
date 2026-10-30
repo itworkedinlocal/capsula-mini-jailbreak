@@ -1,0 +1,7 @@
+#!/bin/busybox sh
+export PATH=/bin:/sbin
+echo
+echo 'Capsula USB RAM test. Temporary userspace; stock system is not running.'
+/capsula-status
+echo 'Return to stock: disconnect USB power, then use the normal power supply.'
+exec /bin/busybox sh -i

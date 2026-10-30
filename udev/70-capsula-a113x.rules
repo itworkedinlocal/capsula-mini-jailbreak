@@ -1,0 +1,3 @@
+# Amlogic USB bootloader used by VK Capsula Mini A113X.
+# Give the active local desktop user access through logind ACLs.
+SUBSYSTEM=="usb", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1b8e", ATTR{idProduct}=="c003", TAG+="uaccess"

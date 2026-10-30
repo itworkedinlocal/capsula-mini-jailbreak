@@ -1,0 +1,19 @@
+* text=auto eol=lf
+*.go text
+*.py text
+*.c text
+*.json text
+*.jsonc text
+*.md text
+*.rules text
+*.jsonl text
+licenses/** -whitespace
+# Preserve the exact bytes of checksum-pinned runtime resources on every OS.
+resources/update -text
+resources/ramboot/Image -text
+resources/ramboot/*.dtb -text
+resources/ramboot/*.cpio.gz -text
+resources/stock-root/bin/** -text
+resources/stock-root/sources/** -text
+resources/stock-root/toolkit/** -text
+resources/stock-root/toolkit/**/licenses/** -whitespace

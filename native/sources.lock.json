@@ -1,0 +1,82 @@
+{
+  "schema_version": 1,
+  "kernel_repository": "https://github.com/comp18man/vk-capsula-mini-a113x-linux",
+  "kernel_revision": "8d850405b091aaf217f8bb1bbdf22852f5cdb61e",
+  "files": {
+    "zig-0.15.2-x86_64.tar.xz": {
+      "url": "https://ziglang.org/download/0.15.2/zig-x86_64-linux-0.15.2.tar.xz",
+      "sha256": "02aa270f183da276e5b5920b1dac44a63f1a49e55050ebde3aecc9eb82f93239",
+      "group": "toolchain"
+    },
+    "dropbear-2026.94.tar.bz2": {
+      "url": "https://matt.ucc.asn.au/dropbear/releases/dropbear-2026.94.tar.bz2",
+      "sha256": "e098034a843699200c8c977a991fff73159735bf795d5f72ef672c41a6b1ae81",
+      "group": "dropbear"
+    },
+    "ncurses-6.6.tar.gz": {
+      "url": "https://invisible-island.net/archives/ncurses/ncurses-6.6.tar.gz",
+      "sha256": "355b4cbbed880b0381a04c46617b7656e362585d52e9cf84a67e2009b749ff11",
+      "group": "toolkit"
+    },
+    "nano-9.3.tar.xz": {
+      "url": "https://www.nano-editor.org/dist/v9/nano-9.3.tar.xz",
+      "sha256": "a9affc52c9596ee0682bcdd4ceb3c0b235eb221d83d733dfd9b0dff45897cb0d",
+      "group": "toolkit"
+    },
+    "htop-3.5.3.tar.xz": {
+      "url": "https://github.com/htop-dev/htop/releases/download/3.5.3/htop-3.5.3.tar.xz",
+      "sha256": "a8b164386494cb85bb255a415a3f5f80afe7a0c4491da5d113b3a0f951087e65",
+      "group": "toolkit"
+    },
+    "fastfetch-2.70.0.tar.gz": {
+      "url": "https://codeload.github.com/fastfetch-cli/fastfetch/tar.gz/refs/tags/2.70.0",
+      "sha256": "8aa01bd3faff2be1d94f231d76489ce6d9f781f51f6e93eafe82359d6d8669af",
+      "group": "toolkit"
+    },
+    "openssh-10.2p1.tar.gz": {
+      "url": "https://cdn.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-10.2p1.tar.gz",
+      "sha256": "ccc42c0419937959263fa1dbd16dafc18c56b984c03562d2937ce56a60f798b2",
+      "group": "toolkit"
+    },
+    "busybox-1.37.0.tar.bz2": {
+      "url": "https://busybox.net/downloads/busybox-1.37.0.tar.bz2",
+      "sha256": "3311dff32e746499f4df0d5df04d7eb396382d7e108bb9250e7b519b837043a4",
+      "group": "toolkit"
+    },
+    "curl-8.23.0.tar.xz": {
+      "url": "https://curl.se/download/curl-8.23.0.tar.xz",
+      "sha256": "8dadd7d2536a314f982ad05a651b713f426bf7d02cc2c76cffb9796f2218e6c5",
+      "group": "toolkit"
+    },
+    "mbedtls-3.6.7.tar.bz2": {
+      "url": "https://github.com/Mbed-TLS/mbedtls/releases/download/mbedtls-3.6.7/mbedtls-3.6.7.tar.bz2",
+      "sha256": "a7e8bcbec0e6f761b4af24f25677626b35f762f68eef79c08677a363212d11f6",
+      "group": "toolkit"
+    },
+    "libusb-1.0.30.tar.bz2": {
+      "url": "https://github.com/libusb/libusb/releases/download/v1.0.30/libusb-1.0.30.tar.bz2",
+      "sha256": "fea36f34f9156400209595e300840767ab1a385ede1dc7ee893015aea9c6dbaf",
+      "group": "usb"
+    },
+    "libusb-compat-0.1.9.tar.bz2": {
+      "url": "https://github.com/libusb/libusb-compat-0.1/releases/download/v0.1.9/libusb-compat-0.1.9.tar.bz2",
+      "sha256": "179d934676ad3bd172a5a37cf5c6351b8e9d7816feb3029252e79b30a518a3be",
+      "group": "usb"
+    },
+    "Image": {
+      "url": "https://storage.vysm.ru/s/cBzNtZrxeYFi4Ai/download?path=%2Ffw_alpine&files=Image",
+      "sha256": "7a155fcd0fbab5af149094f408e3bbb2209d478e4adac924659cd2b049014226",
+      "group": "ramboot"
+    },
+    "vk-mini-a113x.dtb": {
+      "url": "https://storage.vysm.ru/s/cBzNtZrxeYFi4Ai/download?path=%2Ffw_alpine&files=vk-mini-a113x.dtb",
+      "sha256": "aa02c59464db78f777d6168156aeebc8481d98f768ee82da5b9cb6f55ca2e36c",
+      "group": "ramboot"
+    },
+    "alpine-minirootfs-3.24.3-aarch64.tar.gz": {
+      "url": "https://dl-cdn.alpinelinux.org/alpine/v3.24/releases/aarch64/alpine-minirootfs-3.24.3-aarch64.tar.gz",
+      "sha256": "4d3f80afaebd447c5591a63a73bde380a149fe8b2d85488cafabb2ff97551f50",
+      "group": "ramboot"
+    }
+  }
+}

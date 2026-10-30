@@ -1,0 +1,61 @@
+#!/bin/busybox sh
+export PATH=/bin:/sbin
+
+stop_test() {
+    echo "STOP: $*. Disconnect power; this test will not continue." > /dev/console
+    while :; do /bin/busybox sleep 5; done
+}
+
+mount -t proc proc /proc || stop_test proc
+mount -t sysfs sysfs /sys || stop_test sysfs
+mount -t devtmpfs devtmpfs /dev || stop_test devtmpfs
+mkdir -p /dev/pts /run /sys/kernel/config || stop_test directories
+mount -t devpts devpts /dev/pts || stop_test devpts
+mount -t configfs configfs /sys/kernel/config || stop_test configfs
+
+check_storage() {
+    for node in /sys/class/mtd/mtd[0-9]*; do
+        [ ! -e "$node" ] || stop_test "unexpected MTD device"
+    done
+    for node in /sys/class/block/*; do
+        [ -e "$node" ] || continue
+        case "${node##*/}" in
+            loop*|ram*|zram*) ;;
+            *) stop_test "unexpected block device" ;;
+        esac
+    done
+}
+check_storage
+
+G=/sys/kernel/config/usb_gadget/capsula_ram
+mkdir "$G" || stop_test gadget
+echo 0x1d6b > "$G/idVendor" || stop_test vendor
+echo 0x0104 > "$G/idProduct" || stop_test product
+mkdir -p "$G/strings/0x409" "$G/configs/c.1/strings/0x409" || stop_test strings
+echo capsula-ramboot > "$G/strings/0x409/serialnumber" || stop_test serial
+echo Local-experiment > "$G/strings/0x409/manufacturer" || stop_test manufacturer
+echo Capsula-RAM-console > "$G/strings/0x409/product" || stop_test name
+echo USB-console-only > "$G/configs/c.1/strings/0x409/configuration" || stop_test config
+echo 250 > "$G/configs/c.1/MaxPower" || stop_test power
+mkdir "$G/functions/acm.usb0" || stop_test acm
+/bin/busybox ln -s "$G/functions/acm.usb0" "$G/configs/c.1/acm.usb0" || stop_test function
+
+controller=
+for attempt in 1 2 3 4 5; do
+    for udc in /sys/class/udc/*; do
+        [ -e "$udc" ] || continue
+        controller=${udc##*/}
+        break
+    done
+    [ -z "$controller" ] || break
+    sleep 1
+done
+[ -n "$controller" ] || stop_test "no USB device controller"
+echo "$controller" > "$G/UDC" || stop_test bind
+[ -c /dev/ttyGS0 ] || stop_test "no ACM terminal"
+
+while :; do
+    check_storage
+    /bin/busybox getty -L -n -l /capsula-console 115200 ttyGS0 vt100
+    sleep 1
+done

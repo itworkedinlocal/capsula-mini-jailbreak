@@ -1,0 +1,22 @@
+#!/bin/sh
+export PATH=/usr/lib/capsula-root/bin:/usr/sbin:/usr/bin:/sbin:/bin
+case "${1:-help}" in
+    help|--help|-h)
+        printf '%s\n' 'VK Capsula — постоянный root SSH' '' \
+            '  capsula status              состояние SSH и место на data' \
+            '  capsula info                сведения об устройстве' \
+            '  capsula entware install     установить дополнительный opkg' \
+            '  capsula entware status      состояние Entware' \
+            '  capsula entware remove      отключить Entware (пакеты сохраняются)' \
+            '' 'Редактор: nano. Процессы: htop. Сведения: fastfetch.' \
+            'Настройки входа: /data/capsula-root.conf' \
+            'Скрыть приветствие: добавить строку CAPSULA_WELCOME=0.'
+        ;;
+    status)
+        /usr/lib/capsula-root/service status
+        /usr/lib/capsula-root/busybox df -h /data
+        ;;
+    info) exec /usr/lib/capsula-root/bin/fastfetch --config /usr/lib/capsula-root/fastfetch.jsonc ;;
+    entware) shift; exec /usr/lib/capsula-root/entware "$@" ;;
+    *) printf 'Неизвестная команда. Справка: capsula help\n' >&2; exit 2 ;;
+esac

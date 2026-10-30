@@ -1,0 +1,26 @@
+{
+  "aarch64/supervisor": {
+    "sha256": "c350106b284f2742b7ce00201c11d27590325f6f6dbe19615b78f97b8d8989aa",
+    "bytes": 71256
+  },
+  "aarch64/directory-times": {
+    "sha256": "4d126de8ddcf1431e7d663b964bc2ddd949abe2eedb02f568194f430178607c2",
+    "bytes": 10304
+  },
+  "aarch64/ubi-control": {
+    "sha256": "4eb9a4a13623e5122fdedafe029e5e808f2357d79785ee3eff9d488972c16989",
+    "bytes": 54168
+  },
+  "aarch64/nand-agent": {
+    "sha256": "b6d60f16b2cc7e6c9b8ad3f24e592b8c26d7074d68d9ff184a3902ac0714498f",
+    "bytes": 58616
+  },
+  "aarch64/ram-restart": {
+    "sha256": "ba82173df52630ea0ca4275091368966173e4750c9da4fc9f936b4e809ed7cd6",
+    "bytes": 48552
+  },
+  "x86_64/password-hash": {
+    "sha256": "905e7cc8f03f1d2c6148b73a118594ade86764894705b1619a630b2c7f1e846c",
+    "bytes": 27192
+  }
+}

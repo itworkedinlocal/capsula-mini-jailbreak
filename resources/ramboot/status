@@ -1,0 +1,15 @@
+#!/bin/busybox sh
+export PATH=/bin:/sbin
+echo '--- identity ---'
+id
+uname -a
+echo '--- kernel command line ---'
+cat /proc/cmdline
+echo '--- MTD: expected header only ---'
+cat /proc/mtd
+echo '--- block devices ---'
+ls /sys/class/block
+echo '--- USB controllers ---'
+ls /sys/class/udc
+echo '--- mounts: expected RAM and virtual filesystems ---'
+cat /proc/mounts

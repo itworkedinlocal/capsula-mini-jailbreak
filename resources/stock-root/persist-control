@@ -1,0 +1,152 @@
+#!/bin/sh
+# One explicit operation in the reviewed RAM installer. No raw NAND writes.
+set -eu
+export PATH=/bin:/sbin
+BB=/bin/busybox
+[ ! -f /capsula-runtime-policy ] || . /capsula-runtime-policy
+[ -f /capsula-runtime-policy ] || enabled() { return 0; }
+[ -f /capsula-runtime-policy ] || skipped() { echo "SKIPPED $1"; }
+[ ! -f /capsula-device.conf ] || . /capsula-device.conf
+die() { echo "REFUSED: $*" >&2; exit 1; }
+absent() { [ ! -e "$1" ] && [ ! -L "$1" ]; }
+remember_probe() {
+    digest=$($BB sha256sum /capsula-probe-id); digest=${digest%% *}
+    printf '%s\n' "$digest" > /data/.capsula-root-state/probe.sha256
+    $BB chmod 0600 /data/.capsula-root-state/probe.sha256
+    $BB sync
+}
+check_probe() {
+    absent /data/.capsula-root-probe && return 0
+    [ -f /data/.capsula-root-probe ] && [ ! -L /data/.capsula-root-probe ] || die unsafe_probe
+    [ "$($BB stat -c '%u:%g:%a:%h:%s' /data/.capsula-root-probe)" = '0:0:600:1:65' ] || die unsafe_probe_metadata
+    proof=/data/.capsula-root-state/probe.sha256
+    if ! absent "$proof"; then
+        [ -f "$proof" ] && [ ! -L "$proof" ] || die unsafe_probe_proof
+        [ "$($BB stat -c '%u:%g:%a:%h:%s' "$proof")" = '0:0:600:1:65' ] || die unsafe_probe_proof
+        expected_probe=$($BB cat "$proof")
+        [ "${#expected_probe}" = 64 ] || die invalid_probe_proof
+        case "$expected_probe" in *[!0-9a-f]*) die invalid_probe_proof ;; esac
+    else
+        expected_probe=$($BB sha256sum /capsula-probe-id); expected_probe=${expected_probe%% *}
+    fi
+    actual_probe=$($BB sha256sum /data/.capsula-root-probe); actual_probe=${actual_probe%% *}
+    [ "$actual_probe" = "$expected_probe" ] || die foreign_probe
+}
+$BB grep -qw capsula_persist_install=1 /proc/cmdline || die wrong_environment
+$BB awk '$3=="overlay" || $3=="ubifs" {bad=1} END {exit bad}' /proc/mounts || die already_mounted
+case "${1:-}" in check|probe|probe-check|install|refresh|reinstall|rollback) ;; *) die unknown_operation ;; esac
+umask 077
+$BB rm -f /run/capsula-data.bin
+if enabled DATA_COMPARE; then
+    /capsula-read-data || die data_read
+    expected=$($BB cat /capsula-expected-data.sha256)
+    actual=$($BB sha256sum /run/capsula-data.bin); actual=${actual%% *}
+    [ "$actual" = "$expected" ] || die loader_data_mismatch
+    echo "DATA_MATCH $actual"
+    $BB rm /run/capsula-data.bin
+else skipped data-compare; fi
+[ "$1" != check ] || exit 0
+
+cleanup() {
+    rc=$?
+    trap - EXIT
+    $BB sync
+    $BB umount /stock 2>/dev/null || :
+    $BB umount /data 2>/dev/null || :
+    if [ -d /sys/class/ubi/ubi1 ]; then /capsula-ubi-control detach stock || rc=1; fi
+    if [ -d /sys/class/ubi/ubi0 ]; then /capsula-ubi-control detach data || rc=1; fi
+    exit "$rc"
+}
+trap cleanup EXIT
+[ ! -d /sys/class/ubi/ubi0 ] && [ ! -d /sys/class/ubi/ubi1 ] || die already_attached
+/capsula-ubi-control attach data || die data_attach
+[ "$($BB cat /sys/class/ubi/ubi0_0/name)" = data ] || die data_volume
+$BB mount -t ubifs -o noatime,compr=lzo,chk_data_crc ubi0:data /data || die data_mount
+case "$1" in
+probe|probe-check)
+    if [ "$1" = probe ]; then
+        [ ! -e /data/.capsula-root-probe ] && [ ! -L /data/.capsula-root-probe ] || die probe_exists
+        $BB cp /capsula-probe-id /data/.capsula-root-probe
+        $BB chmod 0600 /data/.capsula-root-probe
+    else
+        check_probe
+        $BB cmp /capsula-probe-id /data/.capsula-root-probe || die foreign_probe
+    fi
+    $BB sync
+    $BB umount /data
+    /capsula-ubi-control detach data
+    /capsula-ubi-control attach data
+    $BB mount -t ubifs -o noatime,compr=lzo,chk_data_crc ubi0:data /data
+    $BB cmp /capsula-probe-id /data/.capsula-root-probe || die probe_not_persistent
+    echo PROBE_PERSISTED
+    digest=$($BB sha256sum /data/.capsula-root-probe); echo "PROBE_TOKEN ${digest%% *}"
+    ;;
+install|refresh|reinstall|rollback)
+    /capsula-ubi-control attach stock || die stock_attach
+    [ "$($BB cat /sys/class/ubi/ubi1_0/name)" = rootfs ] || die stock_volume
+    $BB mount -t ubifs -o ro,noatime,chk_data_crc ubi1:rootfs /stock || die stock_mount
+    if [ "$1" = install ] || [ "$1" = refresh ] || [ "$1" = reinstall ]; then
+        if enabled PROBE; then $BB cmp /capsula-probe-id /data/.capsula-root-probe || die probe_not_verified; else skipped probe; fi
+        operation=$1
+        if [ "$1" = reinstall ]; then
+            /capsula-overlay-install rollback || die hardware_rollback
+            $BB sync
+            $BB umount /data
+            /capsula-ubi-control detach data
+            /capsula-ubi-control attach data
+            $BB mount -t ubifs -o noatime,compr=lzo,chk_data_crc ubi0:data /data
+            [ ! -e /data/.capsula-root-state ] || die rollback_state_remains
+            for rel in $($BB awk '{print $3}' /capsula-root-payload/files.tsv) $($BB cat /run/capsula-rollback-paths); do
+                [ ! -e "/data/overlay/upper/$rel" ] && [ ! -L "/data/overlay/upper/$rel" ] || die rollback_file_remains
+            done
+            echo HARDWARE_ROLLBACK_VERIFIED
+            operation=install
+        fi
+        /capsula-overlay-install "$operation" || die install
+        if enabled PROBE; then remember_probe; fi
+        $BB sync
+        if enabled POST_VERIFY; then
+            $BB umount /data
+            /capsula-ubi-control detach data
+            /capsula-ubi-control attach data
+            $BB mount -t ubifs -o noatime,compr=lzo,chk_data_crc ubi0:data /data
+            /capsula-overlay-install verify || die verify
+            if enabled PROBE; then check_probe; fi
+            echo INSTALL_REMOUNT_VERIFIED
+        else skipped post-verify; fi
+        /capsula-overlay-install activate || die activate
+        echo OVERLAY_ACTIVATED
+    else
+        # Validate marker ownership before removing any upper file. The durable
+        # on-device proof keeps rollback independent of host passwords/receipts.
+        check_probe
+        /capsula-overlay-install rollback || die rollback
+        $BB rm -f /data/.capsula-root-probe
+        $BB sync
+        if enabled POST_VERIFY; then
+            $BB umount /data
+            /capsula-ubi-control detach data
+            /capsula-ubi-control attach data
+            $BB mount -t ubifs -o noatime,compr=lzo,chk_data_crc ubi0:data /data
+            for path in /data/.capsula-root-state /data/capsula-root.disabled /data/.capsula-root-probe; do
+                absent "$path" || die rollback_state_remains
+            done
+            while read -r rel; do absent "/data/overlay/upper/$rel" || die rollback_file_remains; done < /run/capsula-rollback-paths
+            echo ROLLBACK_REMOUNT_VERIFIED
+        else skipped post-verify; fi
+        echo PROBE_REMOVED
+        echo OVERLAY_ROLLED_BACK
+    fi
+    ;;
+esac
+$BB sync
+$BB umount /stock 2>/dev/null || :
+$BB umount /data
+if [ -d /sys/class/ubi/ubi1 ]; then /capsula-ubi-control detach stock; fi
+/capsula-ubi-control detach data
+if enabled POST_VERIFY; then
+    /capsula-read-data || die post_write_read
+    $BB sha256sum /run/capsula-data.bin
+    $BB rm /run/capsula-data.bin
+else skipped post-read; fi
+echo STORAGE_CLEAN

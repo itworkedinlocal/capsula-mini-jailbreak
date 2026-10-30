@@ -1,0 +1,24 @@
+#!/bin/sh
+# Persistent password SSH. Never mounts or formats storage.
+export PATH=/usr/sbin:/usr/bin:/sbin:/bin
+case "${1:-}" in
+    stop|status) exec /usr/lib/capsula-root/supervisor "$1" ;;
+    start|restart) ;;
+    *) echo 'usage: service start|stop|restart|status' >&2; exit 2 ;;
+esac
+# supervisor enforces UID 0 with getuid(); stock BusyBox has no id applet.
+if [ -e /data/capsula-root.disabled ]; then
+    /usr/lib/capsula-root/supervisor stop
+    exit 0
+fi
+[ -f /etc/capsula-root/hostkey ] && [ ! -L /etc/capsula-root/hostkey ] || exit 1
+[ -x /usr/lib/capsula-root/dropbearmulti ] || exit 1
+root_hash=
+while IFS=: read -r account hashed remainder; do
+    if [ "$account" = root ]; then root_hash=$hashed; break; fi
+done < /etc/shadow
+case "$root_hash" in '$6$'*) ;; *) exit 1 ;; esac
+unset root_hash hashed
+# Entware mount failures never prevent the SSH listener from starting.
+/usr/lib/capsula-root/entware mount </dev/null >/dev/null 2>&1 || :
+exec /usr/lib/capsula-root/supervisor "$1"

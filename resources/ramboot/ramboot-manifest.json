@@ -1,0 +1,90 @@
+{
+  "purpose": "Minimal temporary USB ACM root console; DTB disables storage and optional peripherals",
+  "disabled_nodes": [
+    "/audio-controller-0",
+    "/audio-controller-1",
+    "/audio-controller-2",
+    "/efuse",
+    "/soc/bus@ff800000/i2c@5000",
+    "/soc/bus@ffd00000/watchdog@f0d0",
+    "/soc/bus@ffd00000/spi@13000",
+    "/soc/bus@ffd00000/spi@15000",
+    "/soc/bus@ffd00000/i2c@1c000",
+    "/soc/bus@ffd00000/i2c@1d000",
+    "/soc/bus@ffd00000/i2c@1e000",
+    "/soc/bus@ffd00000/i2c@1f000",
+    "/soc/bus@ffe00000/mmc@5000",
+    "/soc/bus@ffe00000/mmc@7000",
+    "/soc/bus@ffe00000/nand-controller@7800",
+    "/wifi32k",
+    "/sdio-pwrseq",
+    "/display",
+    "/audio-codec-0",
+    "/sound"
+  ],
+  "cpio_entries": [
+    "bin",
+    "lib",
+    "sbin",
+    "etc",
+    "proc",
+    "sys",
+    "dev",
+    "dev/pts",
+    "run",
+    "tmp",
+    "root",
+    "bin/busybox",
+    "lib/ld-musl-aarch64.so.1",
+    "bin/sh",
+    "bin/mount",
+    "bin/mkdir",
+    "bin/sleep",
+    "bin/cat",
+    "bin/id",
+    "bin/uname",
+    "bin/ls",
+    "bin/readlink",
+    "bin/dmesg",
+    "bin/grep",
+    "bin/head",
+    "bin/wc",
+    "lib/libc.musl-aarch64.so.1",
+    "capsula-ram-init",
+    "capsula-console",
+    "capsula-status",
+    "dev/console",
+    "dev/null",
+    "TRAILER!!!"
+  ],
+  "files": {
+    "Image": {
+      "bytes": 16715784,
+      "sha256": "7a155fcd0fbab5af149094f408e3bbb2209d478e4adac924659cd2b049014226"
+    },
+    "vk-mini-a113x-usb-only.dtb": {
+      "bytes": 42953,
+      "sha256": "fcc62e6fb6bf13e3bd589564102c4f06f7b8156ad8a932ac18d5411e5f003485"
+    },
+    "initramfs.cpio.gz": {
+      "bytes": 928095,
+      "sha256": "7126bdc4411b753832a666e61209af563b7e9cf090649063dcdd8240116fa7e8"
+    },
+    "initramfs.uimg": {
+      "bytes": 928159,
+      "sha256": "913ac72b292ebb779f413ae60f2d1e91525b70513210056a7ddbe2a712173018"
+    },
+    "init": {
+      "bytes": 2136,
+      "sha256": "e667c76bd7ff6d061af05ab14f859a283b0c50e97009812d25b3f285d7a5669e"
+    },
+    "console": {
+      "bytes": 245,
+      "sha256": "d909ba8b8a18b3c7327fbd5ebd63f08046469a7592317e392d40a9c6d74449c8"
+    },
+    "status": {
+      "bytes": 360,
+      "sha256": "59fc2604549ecad675ab1515e77a3acd332c80b31219feb3530ba0fe9c563e64"
+    }
+  }
+}

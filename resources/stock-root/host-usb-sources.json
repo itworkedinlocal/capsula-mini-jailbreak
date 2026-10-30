@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "files": {
+    "libusb-1.0.30.tar.bz2": {
+      "url": "https://github.com/libusb/libusb/releases/download/v1.0.30/libusb-1.0.30.tar.bz2",
+      "sha256": "fea36f34f9156400209595e300840767ab1a385ede1dc7ee893015aea9c6dbaf",
+      "bytes": 656112
+    },
+    "libusb-compat-0.1.9.tar.bz2": {
+      "url": "https://github.com/libusb/libusb-compat-0.1/releases/download/v0.1.9/libusb-compat-0.1.9.tar.bz2",
+      "sha256": "179d934676ad3bd172a5a37cf5c6351b8e9d7816feb3029252e79b30a518a3be",
+      "bytes": 328896
+    }
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "options": "/* Capsule root SSH: password authentication and private SFTP server. */\n#define DROPBEAR_SVR_PASSWORD_AUTH 1\n#define DROPBEAR_SVR_PUBKEY_AUTH 0\n#define DROPBEAR_SK_ECDSA 0\n#define DROPBEAR_SK_ED25519 0\n#define DROPBEAR_SFTPSERVER 1\n#define SFTPSERVER_PATH \"/usr/lib/capsula-root/sftp-server\"\n#define DEFAULT_ROOT_PATH \"/usr/lib/capsula-root/bin:/usr/sbin:/usr/bin:/sbin:/bin\"\n#define DO_MOTD 0\n",
+  "binaries": {
+    "aarch64": {
+      "bytes": 622984,
+      "sha256": "86add59e36727cd0fa3a18f3f348868ee36c098bd914e2ca6756d09d194a0b70",
+      "target": "aarch64-linux-musl",
+      "static": true,
+      "version": "2026.94"
+    },
+    "x86_64": {
+      "bytes": 594976,
+      "sha256": "394e3e68c6e9f14e2571e403438963801ef16d127bd027c7e6fe51d9ac0d6329",
+      "target": "x86_64-linux-musl",
+      "static": true,
+      "version": "2026.94"
+    }
+  },
+  "password_max_utf8_bytes": 512,
+  "sha512_crypt_source_sha256": "efcdc376be1071a0a315f4163997cdc9c533857b3117340274748b4ce7bd1767"
+}

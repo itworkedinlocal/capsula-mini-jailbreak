@@ -1,0 +1,237 @@
+{
+  "schema_version": 2,
+  "architecture": "aarch64",
+  "static_musl": true,
+  "busybox_compiler_flags": "-Os -DBB_GLOBAL_CONST=",
+  "complete": true,
+  "applets": [
+    "ash",
+    "awk",
+    "basename",
+    "base64",
+    "bunzip2",
+    "bzcat",
+    "bzip2",
+    "cat",
+    "chmod",
+    "chown",
+    "clear",
+    "cp",
+    "cut",
+    "date",
+    "df",
+    "dirname",
+    "du",
+    "echo",
+    "env",
+    "expr",
+    "false",
+    "find",
+    "free",
+    "grep",
+    "groups",
+    "gunzip",
+    "gzip",
+    "head",
+    "hostname",
+    "id",
+    "kill",
+    "killall",
+    "less",
+    "ln",
+    "ls",
+    "mkdir",
+    "mktemp",
+    "more",
+    "mv",
+    "nice",
+    "nohup",
+    "od",
+    "paste",
+    "printf",
+    "ps",
+    "pwd",
+    "readlink",
+    "realpath",
+    "reset",
+    "rm",
+    "rmdir",
+    "sed",
+    "seq",
+    "sh",
+    "sha256sum",
+    "sha512sum",
+    "sleep",
+    "sort",
+    "stat",
+    "tail",
+    "tar",
+    "tee",
+    "test",
+    "time",
+    "timeout",
+    "top",
+    "touch",
+    "tr",
+    "true",
+    "uname",
+    "uniq",
+    "unzip",
+    "uptime",
+    "wc",
+    "wget",
+    "which",
+    "whoami",
+    "xargs",
+    "xz",
+    "xzcat",
+    "cmp",
+    "flock",
+    "mount",
+    "umount",
+    "sync",
+    "stty"
+  ],
+  "versions": {
+    "ncurses": "6.6",
+    "nano": "9.3",
+    "htop": "3.5.3",
+    "fastfetch": "2.70.0",
+    "openssh": "10.2p1",
+    "busybox": "1.37.0",
+    "mbedtls": "3.6.7",
+    "curl": "8.23.0"
+  },
+  "files": {
+    "busybox": {
+      "sha256": "e3778e5667cebe75be76868a3334955b6f293528f0e67fecf2395276ae67b6e1",
+      "bytes": 479024,
+      "mode": 493
+    },
+    "curl": {
+      "sha256": "25af0ea60c46530170b9533e07afb789d586c592246ee8042e7913fa71d443bf",
+      "bytes": 1431056,
+      "mode": 493
+    },
+    "fastfetch": {
+      "sha256": "0d6e31ef4ab37a4f941da8dea5914936a2c1dff257a93ed322ba4c368a437b32",
+      "bytes": 1588696,
+      "mode": 493
+    },
+    "htop": {
+      "sha256": "ac63aa355f7416eabce53e23277d1cc459e8228c43de909cf676a5cb1b8e6756",
+      "bytes": 531888,
+      "mode": 493
+    },
+    "licenses/busybox.txt": {
+      "sha256": "bbfc9843646d483c334664f651c208b9839626891d8f17604db2146962f43548",
+      "bytes": 18348,
+      "mode": 420
+    },
+    "licenses/curl.txt": {
+      "sha256": "82f2f4427d6545ee5aaac4f0b80428da6cc8ba41c2cf5da3a03680ec327b9681",
+      "bytes": 1088,
+      "mode": 420
+    },
+    "licenses/fastfetch.txt": {
+      "sha256": "f30fab2451411172d78522346e91eae63ef1ea11c3487bc9acd0a68acd8c9571",
+      "bytes": 1112,
+      "mode": 420
+    },
+    "licenses/htop.txt": {
+      "sha256": "8177f97513213526df2cf6184d8ff986c675afb514d4e68a404010521b880643",
+      "bytes": 18092,
+      "mode": 420
+    },
+    "licenses/mbedtls.txt": {
+      "sha256": "9b405ef4c89342f5eae1dd828882f931747f71001cfba7d114801039b52ad09b",
+      "bytes": 29852,
+      "mode": 420
+    },
+    "licenses/nano.txt": {
+      "sha256": "fc82ca8b6fdb18d4e3e85cfd8ab58d1bcd3f1b29abe782895abd91d64763f8e7",
+      "bytes": 35068,
+      "mode": 420
+    },
+    "licenses/ncurses.txt": {
+      "sha256": "708999f95527e1ffa670c6fce288c6c600cb477dd04afcc1171422b3dd4ee226",
+      "bytes": 1447,
+      "mode": 420
+    },
+    "licenses/openssh.txt": {
+      "sha256": "5bb5b160726ef5756e4f32fe95b35249c294962419650f48d05134b486d27ccb",
+      "bytes": 21140,
+      "mode": 420
+    },
+    "nano": {
+      "sha256": "ce9a7a8b117013925bb38a8e2aac8604dffa5eebbf6c964441b45834cb8e2fbe",
+      "bytes": 691128,
+      "mode": 493
+    },
+    "sftp-server": {
+      "sha256": "d34b7200d16356c240017b30482bb3d9062d1ffb6056089d549ce45d3f3c5422",
+      "bytes": 379344,
+      "mode": 493
+    },
+    "terminfo/a/alacritty": {
+      "sha256": "d38836d94493d40580ad57ba9f2865b472850f00cf3ffa2c96ade49ec1336f7a",
+      "bytes": 3820,
+      "mode": 420
+    },
+    "terminfo/a/ansi": {
+      "sha256": "93ec8cb9beb0c898ebc7dda0f670de31addb605be9005735228680d592cff657",
+      "bytes": 1481,
+      "mode": 420
+    },
+    "terminfo/d/dumb": {
+      "sha256": "123c85a2812a517d967db5f31660db0e6aded4a0b95ed943c5ab435368e7a25c",
+      "bytes": 308,
+      "mode": 420
+    },
+    "terminfo/l/linux": {
+      "sha256": "b70a4941416eb703a01b5a06fd1c914880452302b0e0b2a7dea12600607824a7",
+      "bytes": 1740,
+      "mode": 420
+    },
+    "terminfo/s/screen": {
+      "sha256": "959a7f2be76d57c46890d4762c6f9b3658138d1f695ac0f4cd31fc7d5c3c6c79",
+      "bytes": 1667,
+      "mode": 420
+    },
+    "terminfo/s/screen-256color": {
+      "sha256": "33ec1d53ea6c5a494ec1e00148604f408bc43d0fd1669201e50f552619b22afa",
+      "bytes": 1807,
+      "mode": 420
+    },
+    "terminfo/t/tmux": {
+      "sha256": "ffe7235fb1b775cc0cb112f84151f5755597c0705e45961235db13f8cfe48470",
+      "bytes": 3317,
+      "mode": 420
+    },
+    "terminfo/t/tmux-256color": {
+      "sha256": "7f2870efd2bc94ba6ff2c6dd6e84777b687f4331920ad388991c5ffcfc444cca",
+      "bytes": 3459,
+      "mode": 420
+    },
+    "terminfo/v/vt100": {
+      "sha256": "779a219d6ed2ed282f9416ee04fe65f92a1c90606cf6e93a61cebfc3aa96c982",
+      "bytes": 1282,
+      "mode": 420
+    },
+    "terminfo/v/vt100-am": {
+      "sha256": "779a219d6ed2ed282f9416ee04fe65f92a1c90606cf6e93a61cebfc3aa96c982",
+      "bytes": 1282,
+      "mode": 420
+    },
+    "terminfo/x/xterm": {
+      "sha256": "258dbccf3cb114079baf5d3f870fbe0b6b1470303fa8399d2fca1dc56e9527c1",
+      "bytes": 3980,
+      "mode": 420
+    },
+    "terminfo/x/xterm-256color": {
+      "sha256": "1eb6ddea79d7512693e3be76ee66939984d134b5ad179b9418e73a651df9e5ef",
+      "bytes": 4074,
+      "mode": 420
+    }
+  }
+}

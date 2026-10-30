@@ -1,0 +1,28 @@
+{
+  "target": "x86_64-linux-gnu.2.17",
+  "backend": "libusb-compat 0.1.9 + libusb 1.0.30 (no udev dependency)",
+  "sources": {
+    "libusb-1.0.30.tar.bz2": {
+      "url": "https://github.com/libusb/libusb/releases/download/v1.0.30/libusb-1.0.30.tar.bz2",
+      "sha256": "fea36f34f9156400209595e300840767ab1a385ede1dc7ee893015aea9c6dbaf",
+      "bytes": 656112
+    },
+    "libusb-compat-0.1.9.tar.bz2": {
+      "url": "https://github.com/libusb/libusb-compat-0.1/releases/download/v0.1.9/libusb-compat-0.1.9.tar.bz2",
+      "sha256": "179d934676ad3bd172a5a37cf5c6351b8e9d7816feb3029252e79b30a518a3be",
+      "bytes": 328896
+    }
+  },
+  "files": {
+    "libusb-1.0.so.0": {
+      "path": "bin/x86_64/libusb-1.0.so.0",
+      "sha256": "86accf6a36f0dce0e8e0a3ea116c332ee156a40ef19bb2d8916794a5da077234",
+      "bytes": 100880
+    },
+    "libusb-0.1.so.4": {
+      "path": "bin/x86_64/libusb-0.1.so.4",
+      "sha256": "f3e1c8dc9f335d93c16a64ca0f51fabeca8f828237668afd6cc3cbbebd3d9eb0",
+      "bytes": 16144
+    }
+  }
+}

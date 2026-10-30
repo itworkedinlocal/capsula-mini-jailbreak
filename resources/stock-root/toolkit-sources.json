@@ -1,0 +1,42 @@
+{
+  "ncurses": {
+    "archive": "ncurses-6.6.tar.gz",
+    "url": "https://invisible-island.net/archives/ncurses/ncurses-6.6.tar.gz",
+    "sha256": "355b4cbbed880b0381a04c46617b7656e362585d52e9cf84a67e2009b749ff11"
+  },
+  "nano": {
+    "archive": "nano-9.3.tar.xz",
+    "url": "https://www.nano-editor.org/dist/v9/nano-9.3.tar.xz",
+    "sha256": "a9affc52c9596ee0682bcdd4ceb3c0b235eb221d83d733dfd9b0dff45897cb0d"
+  },
+  "htop": {
+    "archive": "htop-3.5.3.tar.xz",
+    "url": "https://github.com/htop-dev/htop/releases/download/3.5.3/htop-3.5.3.tar.xz",
+    "sha256": "a8b164386494cb85bb255a415a3f5f80afe7a0c4491da5d113b3a0f951087e65"
+  },
+  "fastfetch": {
+    "archive": "fastfetch-2.70.0.tar.gz",
+    "url": "https://codeload.github.com/fastfetch-cli/fastfetch/tar.gz/refs/tags/2.70.0",
+    "sha256": "8aa01bd3faff2be1d94f231d76489ce6d9f781f51f6e93eafe82359d6d8669af"
+  },
+  "openssh": {
+    "archive": "openssh-10.2p1.tar.gz",
+    "url": "https://cdn.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-10.2p1.tar.gz",
+    "sha256": "ccc42c0419937959263fa1dbd16dafc18c56b984c03562d2937ce56a60f798b2"
+  },
+  "busybox": {
+    "archive": "busybox-1.37.0.tar.bz2",
+    "url": "https://busybox.net/downloads/busybox-1.37.0.tar.bz2",
+    "sha256": "3311dff32e746499f4df0d5df04d7eb396382d7e108bb9250e7b519b837043a4"
+  },
+  "curl": {
+    "archive": "curl-8.23.0.tar.xz",
+    "url": "https://curl.se/download/curl-8.23.0.tar.xz",
+    "sha256": "8dadd7d2536a314f982ad05a651b713f426bf7d02cc2c76cffb9796f2218e6c5"
+  },
+  "mbedtls": {
+    "archive": "mbedtls-3.6.7.tar.bz2",
+    "url": "https://github.com/Mbed-TLS/mbedtls/releases/download/mbedtls-3.6.7/mbedtls-3.6.7.tar.bz2",
+    "sha256": "a7e8bcbec0e6f761b4af24f25677626b35f762f68eef79c08677a363212d11f6"
+  }
+}

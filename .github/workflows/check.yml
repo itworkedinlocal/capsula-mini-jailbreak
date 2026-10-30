@@ -1,0 +1,23 @@
+name: Source checks
+
+on: [push, pull_request, workflow_dispatch]
+
+permissions:
+  contents: read
+
+jobs:
+  source:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: make test-full vet build build-windows
+      - name: Compile Windows tests
+        run: GOOS=windows GOARCH=amd64 CGO_ENABLED=0 go test -c -o build/capsula-windows-tests.exe ./internal/capsula
+      - name: Check Python sources
+        run: python3 -m compileall -q scripts native

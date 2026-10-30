@@ -1,0 +1,13 @@
+{
+  "target": "windows/amd64",
+  "files": {
+    "password-hash.exe": {
+      "bytes": 42496,
+      "sha256": "83a58de5b1805ffdd735ccde9aa34c6926a3ddc68acc78b471f36e1d3e0c4464"
+    }
+  },
+  "sources": {
+    "password-hash.c": "53c1b2202b3eb8f2f719177dff786051de44bc37d95ac19601cc099cfd82d9f7",
+    "sha512-crypt.c": "efcdc376be1071a0a315f4163997cdc9c533857b3117340274748b4ce7bd1767"
+  }
+}

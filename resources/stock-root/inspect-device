@@ -1,0 +1,66 @@
+#!/bin/sh
+# Kernel-backed view of the current filesystem, including journal replay in RAM.
+# MTD data is read-only in this environment; no installer is included.
+set -eu
+BB=/bin/busybox
+. /capsula-device.conf
+[ "$DATA_WRITABLE" = 0 ] || exit 1
+$BB awk '$3=="overlay"||$3=="ubifs"{bad=1}END{exit bad}' /proc/mounts || exit 1
+cleanup() {
+    rc=$?; trap - EXIT
+    $BB umount /data 2>/dev/null || :
+    $BB umount /stock 2>/dev/null || :
+    if [ -d /sys/class/ubi/ubi0 ]; then /capsula-ubi-control detach data || rc=1; fi
+    if [ -d /sys/class/ubi/ubi1 ]; then /capsula-ubi-control detach stock || rc=1; fi
+    exit "$rc"
+}
+trap cleanup EXIT
+emit_file() {
+    file=$1; limit=$2
+    [ -f "$file" ] && [ ! -L "$file" ] || exit 1
+    size=$($BB stat -c %s "$file"); [ "$size" -le "$limit" ] || exit 1
+    digest=$($BB sha256sum "$file"); digest=${digest%% *}
+    printf 'FILE %s %s ' "$file" "$digest"
+    /busybox-capsula base64 "$file" | /busybox-capsula tr -d '\n'
+    printf '\n'
+}
+/capsula-ubi-control attach stock
+[ "$($BB cat /sys/class/ubi/ubi1_0/name)" = rootfs ] || exit 1
+$BB mount -t ubifs -o ro,noatime,chk_data_crc ubi1:rootfs /stock
+for file in etc/passwd etc/shadow etc/profile etc/init.d/S89usbgadget.sh; do emit_file "/stock/$file" 262144; done
+for module in /stock/lib/modules/*; do
+    [ -d "$module" ] || continue
+    printf 'KERNEL %s\n' "${module##*/}"
+done
+/capsula-ubi-control attach data
+[ "$($BB cat /sys/class/ubi/ubi0_0/name)" = data ] || exit 1
+$BB mount -t ubifs -o ro,noatime,chk_data_crc ubi0:data /data
+if [ -e /data/.capsula-root-state ] || [ -L /data/.capsula-root-state ]; then
+    [ -d /data/.capsula-root-state ] && [ ! -L /data/.capsula-root-state ] || exit 1
+    emit_file /data/.capsula-root-state/state 128
+    for file in manifest.json files.tsv probe.sha256; do
+        if [ -e "/data/.capsula-root-state/$file" ] || [ -L "/data/.capsula-root-state/$file" ]; then
+            emit_file "/data/.capsula-root-state/$file" 1048576
+        fi
+    done
+    echo DEVICE_INSTALLED
+    if [ "${1:-}" = credentials ]; then
+        [ "$($BB cat /data/.capsula-root-state/state)" = active ] || exit 1
+        for dir in /data/overlay /data/overlay/upper /data/overlay/upper/etc /data/overlay/upper/etc/capsula-root; do
+            [ -d "$dir" ] && [ ! -L "$dir" ] || exit 1
+        done
+        for file in etc/shadow etc/capsula-root/hostkey; do
+            path=/data/overlay/upper/$file
+            [ "$($BB stat -c '%u:%g:%a:%h' "$path")" = 0:0:600:1 ] || exit 1
+            emit_file "$path" 262144
+        done
+    fi
+else
+    echo DEVICE_STOCK
+fi
+if [ -e /data/.capsula-root-probe ] || [ -L /data/.capsula-root-probe ]; then emit_file /data/.capsula-root-probe 65; fi
+$BB umount /data
+$BB umount /stock
+/capsula-ubi-control detach data
+/capsula-ubi-control detach stock
+echo DEVICE_CLEAN

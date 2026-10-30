@@ -1,0 +1,20 @@
+# Shared policy for the host-generated RAM environment. Absence means simple.
+CAPSULA_MODE=simple
+CHECK_BACKUP=1 CHECK_FULL_SCAN=1 CHECK_ECC_COMPARE=1 CHECK_MAPPING_COMPARE=1
+CHECK_DATA_COMPARE=1 CHECK_PROBE=1 CHECK_PROBE_AUDIT=1 CHECK_STOCK_COMPARE=1
+CHECK_PACKAGE_HASH=1 CHECK_SPACE=1 CHECK_CONFLICTS=1 CHECK_POST_VERIFY=1 CHECK_SSH=1
+[ ! -f /capsula-policy.conf ] || . /capsula-policy.conf
+case "$CAPSULA_MODE" in simple|fast|expert) ;; *) echo 'REFUSED: invalid_policy' >&2; exit 1 ;; esac
+for policy_key in BACKUP FULL_SCAN ECC_COMPARE MAPPING_COMPARE DATA_COMPARE PROBE PROBE_AUDIT STOCK_COMPARE PACKAGE_HASH SPACE CONFLICTS POST_VERIFY SSH; do
+    eval "policy_value=\${CHECK_$policy_key}"
+    case "$policy_value" in 0|1) ;; *) echo 'REFUSED: invalid_policy_value' >&2; exit 1 ;; esac
+    if [ "$CAPSULA_MODE" = simple ] && [ "$policy_value" != 1 ]; then
+        echo 'REFUSED: simple_policy_override' >&2; exit 1
+    fi
+    if [ "$CAPSULA_MODE" = fast ]; then
+        case "$policy_key" in BACKUP|FULL_SCAN|ECC_COMPARE|MAPPING_COMPARE|DATA_COMPARE|PROBE|PROBE_AUDIT) expected_policy=0 ;; *) expected_policy=1 ;; esac
+        [ "$policy_value" = "$expected_policy" ] || { echo 'REFUSED: fast_policy_override' >&2; exit 1; }
+    fi
+done
+enabled() { eval "[ \"\${CHECK_$1}\" = 1 ]"; }
+skipped() { printf 'SKIPPED %s\n' "$1"; }

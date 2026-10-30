@@ -1,0 +1,39 @@
+# Shared SSH environment. This file must remain silent without an interactive TTY.
+export PATH=/usr/lib/capsula-root/bin:/usr/sbin:/usr/bin:/sbin:/bin
+export EDITOR=/usr/lib/capsula-root/bin/nano
+export VISUAL="$EDITOR"
+export LANG="${LANG:-C.UTF-8}"
+export LC_CTYPE="${LC_CTYPE:-C.UTF-8}"
+if [ "$(/usr/lib/capsula-root/entware state 2>/dev/null)" = active ]; then
+    PATH="$PATH:/opt/bin:/opt/sbin"
+    export PATH
+fi
+
+case "$-" in
+    *i*)
+        if [ -n "${SSH_CONNECTION:-}" ] && [ -t 0 ] && [ -t 1 ]; then
+            # User preferences are deliberately read only inside this guard.
+            CAPSULA_WELCOME=1
+            CAPSULA_COLOR=1
+            [ ! -r /data/capsula-root.conf ] || . /data/capsula-root.conf
+            if [ "$(/usr/lib/capsula-root/supervisor uid)" = 0 ]; then
+                PS1='root@\h:\w# '
+                case "${TERM:-dumb}:$CAPSULA_COLOR" in
+                    dumb:*|*:0) ;;
+                    xterm*:1|screen*:1|tmux*:1|linux:1|putty*:1)
+                        PS1='\[\033[1;32m\]root@\h\[\033[0m\]:\[\033[1;34m\]\w\[\033[0m\]# '
+                        ;;
+                esac
+                export PS1
+            fi
+            if [ "$CAPSULA_WELCOME" = 1 ]; then
+                case "${TERM:-dumb}" in
+                    dumb) printf '\nVK Capsula — root SSH\n' ;;
+                    *) /usr/lib/capsula-root/bin/fastfetch --config /usr/lib/capsula-root/fastfetch.jsonc 2>/dev/null || printf '\nVK Capsula — root SSH\n' ;;
+                esac
+                printf '\nСправка: capsula help · редактор: nano · процессы: htop\n'
+                printf 'Передача файлов: SFTP / SCP. Выход: exit или Ctrl-D.\n\n'
+            fi
+        fi
+        ;;
+esac
