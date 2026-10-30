@@ -6,7 +6,7 @@ import (
 	"strings"
 )
 
-const Version = "0.3.2-rc1"
+const Version = "0.3.2"
 
 var Stages = []string{"backup", "full-scan", "ecc-compare", "mapping-compare", "data-compare", "probe", "probe-audit", "stock-compare", "package-hash", "space", "conflicts", "post-verify", "ssh"}
 
